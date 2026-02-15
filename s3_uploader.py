@@ -123,7 +123,7 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
 
-    parser.add_argument("--file", required=True, help="Path to report JSON file")
+    parser.add_argument("--file", help="Path to report JSON file")
 
     parser.add_argument(
         "--bucket",
@@ -166,6 +166,10 @@ def main():
             for report in reports:
                 print(f"  - {report}")
             return 0
+
+        # If not listing, file is required
+        if not args.file:
+            parser.error("--file is required when not using --list")
 
         object_key = uploader.upload_file(args.file, args.bucket, args.key)
         print(f"\nSuccess! Access your report at:")

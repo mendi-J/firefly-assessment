@@ -190,52 +190,86 @@ jobs:
     
     - name: Start LocalStack
       run: |
+        echo "====== Starting LocalStack ======"
         docker compose up -d localstack
         
         # Wait for LocalStack to be ready
-        echo "Waiting for LocalStack..."
+        echo "====== Waiting for LocalStack to start ======"
         sleep 10
         
         # Check if LocalStack is running
+        echo "====== Checking Docker containers ======"
         docker ps
         
+        # Check LocalStack logs
+        echo "====== LocalStack logs ======"
+        docker compose logs localstack | tail -20
+        
         # Wait for S3 service to be available
+        echo "====== Checking S3 service availability ======"
         for i in {1..30}; do
-          if curl -s http://localhost:4566/_localstack/health | grep -q '"s3".*"available"'; then
-            echo "LocalStack is ready!"
+          echo "Attempt $i/30: Checking health endpoint..."
+          HEALTH=$(curl -s http://localhost:4566/_localstack/health || echo "failed")
+          echo "Health response: $HEALTH"
+          
+          if echo "$HEALTH" | grep -q '"s3".*"available"'; then
+            echo "✅ LocalStack S3 is ready!"
             break
           fi
-          echo "Waiting... ($i/30)"
+          
+          if [ $i -eq 30 ]; then
+            echo "❌ LocalStack failed to become ready after 30 attempts"
+            echo "====== Full LocalStack logs ======"
+            docker compose logs localstack
+            exit 1
+          fi
+          
           sleep 2
         done
     
     - name: Run analyzer and upload to S3
       run: |
-        # Generate report
+        echo "====== Generating analysis report ======"
         python main.py \
           --cloud examples/cloud_resources.json \
           --iac examples/iac_resources.json \
           --output report.json \
           --pretty
         
-        # Upload to LocalStack S3
+        echo "====== Verifying report was created ======"
+        ls -lh report.json
+        echo "====== Report preview ======"
+        head -20 report.json
+        
+        echo "====== Uploading to LocalStack S3 ======"
         python s3_uploader.py \
           --file report.json \
           --bucket firefly-reports \
           --endpoint http://localhost:4566 \
           --create-bucket
+        
+        echo "✅ Upload completed successfully"
     
     - name: Verify S3 upload
       run: |
-        # List reports in S3
+        echo "====== Listing reports in S3 bucket ======"
         python s3_uploader.py \
           --bucket firefly-reports \
           --endpoint http://localhost:4566 \
           --list
+        
+        echo "====== Downloading report from S3 to verify ======"
+        curl -s http://localhost:4566/firefly-reports/reports/report.json | python -m json.tool | head -10
+        
+        echo "✅ Integration test completed successfully!"
     
     - name: Cleanup
       if: always()
-      run: docker compose down -v
+      run: |
+        echo "====== Cleaning up LocalStack ======"
+        docker compose logs localstack | tail -50
+        docker compose down -v
+        echo "✅ Cleanup completed"
 
   build-summary:
     name: Build Summary
