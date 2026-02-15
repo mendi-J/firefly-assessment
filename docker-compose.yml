@@ -9,10 +9,8 @@ services:
     environment:
       - SERVICES=s3
       - DEFAULT_REGION=us-east-1
-      - DATA_DIR=/tmp/localstack/data
       - DEBUG=1
     volumes:
-      - "./tmp/localstack:/tmp/localstack"
       - "/var/run/docker.sock:/var/run/docker.sock"
     networks:
       - firefly-network
