@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  localstack:
+    build: .
+    container_name: firefly-localstack
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=s3
+      - DEFAULT_REGION=us-east-1
+      - DATA_DIR=/tmp/localstack/data
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      - DEBUG=1
+    volumes:
+      - "./tmp/localstack:/tmp/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    networks:
+      - firefly-network
+
+  analyzer:
+    image: python:3.11-slim
+    container_name: firefly-analyzer
+    working_dir: /app
+    volumes:
+      - .:/app
+    environment:
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - AWS_DEFAULT_REGION=us-east-1
+      - AWS_ENDPOINT_URL=http://localstack:4566
+    command: tail -f /dev/null  # Keep container running
+    depends_on:
+      - localstack
+    networks:
+      - firefly-network
+
+networks:
+  firefly-network:
+    driver: bridge

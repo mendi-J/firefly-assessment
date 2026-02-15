@@ -1,0 +1,42 @@
+[
+  {
+    "id": "i-1234567890abcdef0",
+    "type": "aws_instance",
+    "name": "web-server-1",
+    "region": "us-east-1",
+    "instance_type": "t2.micro",
+    "tags": {
+      "totalAmount": "22kb",
+      "Environment": "production",
+      "Owner": "DevOps Team"
+    },
+    "security_groups": ["sg-12345678"],
+    "subnet_id": "subnet-abcdef12"
+  },
+  {
+    "id": "vol-0987654321fedcba",
+    "type": "aws_ebs_volume",
+    "name": "data-volume",
+    "size": 100,
+    "volume_type": "gp3",
+    "encrypted": true,
+    "tags": {
+      "Purpose": "database",
+      "Backup": "daily"
+    }
+  },
+  {
+    "id": "sg-87654321",
+    "type": "aws_security_group",
+    "name": "api-gateway-sg",
+    "description": "Security group for API Gateway",
+    "ingress_rules": [
+      {
+        "from_port": 443,
+        "to_port": 443,
+        "protocol": "tcp",
+        "cidr_blocks": ["10.0.0.0/8"]
+      }
+    ]
+  }
+]
