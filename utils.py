@@ -2,7 +2,7 @@
 This module provides helper functions for deep comparison and change detection.
 """
 
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 
 def deep_compare(
@@ -61,7 +61,7 @@ def find_matching_resource(
     cloud_resource: Dict[str, Any],
     iac_resources: List[Dict[str, Any]],
     match_keys: List[str] = None,
-) -> Dict[str, Any] | None:
+) -> Optional[Dict[str, Any]]:
     if match_keys is None:
         match_keys = ["id"]
 
