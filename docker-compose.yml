@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   localstack:
-    build: .
+    image: localstack/localstack:latest
     container_name: firefly-localstack
     ports:
       - "4566:4566"
@@ -10,7 +10,6 @@ services:
       - SERVICES=s3
       - DEFAULT_REGION=us-east-1
       - DATA_DIR=/tmp/localstack/data
-      - DOCKER_HOST=unix:///var/run/docker.sock
       - DEBUG=1
     volumes:
       - "./tmp/localstack:/tmp/localstack"

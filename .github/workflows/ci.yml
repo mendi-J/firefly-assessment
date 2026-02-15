@@ -193,8 +193,20 @@ jobs:
         
         # Wait for LocalStack to be ready
         echo "Waiting for LocalStack..."
-        timeout 60 bash -c 'until docker-compose exec -T localstack awslocal s3 ls 2>/dev/null; do sleep 2; done'
-        echo "LocalStack is ready!"
+        sleep 10
+        
+        # Check if LocalStack is running
+        docker ps
+        
+        # Wait for S3 service to be available
+        for i in {1..30}; do
+          if curl -s http://localhost:4566/_localstack/health | grep -q '"s3".*"available"'; then
+            echo "LocalStack is ready!"
+            break
+          fi
+          echo "Waiting... ($i/30)"
+          sleep 2
+        done
     
     - name: Run analyzer and upload to S3
       run: |
