@@ -5,10 +5,17 @@ Unit tests for the Firefly Asset Management solution.
 import json
 import pytest
 from pathlib import Path
+import sys
 
-from analyzer import ResourceAnalyzer
-from models import State
-from utils import deep_compare, find_matching_resource
+# Add src to path for imports
+sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
+
+from firefly_analyzer import (
+    ResourceAnalyzer,
+    State,
+    deep_compare,
+    find_matching_resource,
+)
 
 
 class TestDeepCompare:

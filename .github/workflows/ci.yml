@@ -94,7 +94,7 @@ jobs:
     
     - name: Run tests with coverage
       run: |
-        python -m pytest tests/ --cov=. --cov-report=xml --cov-report=html --cov-report=term
+        python -m pytest tests/ --cov=src/firefly_analyzer --cov-report=xml --cov-report=html --cov-report=term
     
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v4
@@ -186,7 +186,6 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-        pip install boto3
     
     - name: Start LocalStack
       run: |
@@ -208,20 +207,14 @@ jobs:
           --cloud examples/cloud_resources.json \
           --iac examples/iac_resources.json \
           --output report.json \
-          --pretty
-        
-        python s3_uploader.py \
-          --file report.json \
-          --bucket firefly-reports \
-          --endpoint http://localhost:4566 \
-          --create-bucket
+          --pretty \
+          --upload-s3 \
+          --s3-endpoint http://localhost:4566 \
+          --s3-create-bucket
     
     - name: Verify S3 upload
       run: |
-        python s3_uploader.py \
-          --bucket firefly-reports \
-          --endpoint http://localhost:4566 \
-          --list
+        curl -s http://localhost:4566/firefly-reports/reports/report.json | python -m json.tool | head -10
     
     - name: Cleanup
       if: always()

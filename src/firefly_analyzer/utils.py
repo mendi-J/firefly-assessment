@@ -8,6 +8,7 @@ from typing import Any, Dict, List, Optional, Tuple
 def deep_compare(
     obj1: Any, obj2: Any, path: str = ""
 ) -> Tuple[bool, List[Tuple[str, Any, Any]]]:
+
     differences = []
 
     if obj1 is None and obj2 is None:
@@ -39,12 +40,14 @@ def deep_compare(
         return len(differences) == 0, differences
 
     if isinstance(obj1, list):
-        if len(obj1) != len(obj2):
-            differences.append((path or "root", obj1, obj2))
-            return False, differences
+        # Handle different-length lists element-by-element
+        max_len = max(len(obj1), len(obj2))
 
-        for i, (item1, item2) in enumerate(zip(obj1, obj2)):
+        for i in range(max_len):
             current_path = f"{path}[{i}]" if path else f"[{i}]"
+            item1 = obj1[i] if i < len(obj1) else None
+            item2 = obj2[i] if i < len(obj2) else None
+
             is_equal, nested_diffs = deep_compare(item1, item2, current_path)
             differences.extend(nested_diffs)
 
@@ -62,6 +65,7 @@ def find_matching_resource(
     iac_resources: List[Dict[str, Any]],
     match_keys: List[str] = None,
 ) -> Optional[Dict[str, Any]]:
+
     if match_keys is None:
         match_keys = ["id"]
 

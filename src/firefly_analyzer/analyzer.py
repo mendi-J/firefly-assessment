@@ -6,8 +6,8 @@ import json
 from typing import Any, Dict, List
 from pathlib import Path
 
-from models import AnalysisResult, ChangeLogEntry, State
-from utils import deep_compare, find_matching_resource
+from .models import AnalysisResult, ChangeLogEntry, State
+from .utils import deep_compare, find_matching_resource
 
 
 class ResourceAnalyzer:
@@ -16,6 +16,7 @@ class ResourceAnalyzer:
         self.match_keys = match_keys or ["id"]
 
     def load_json(self, file_path: str) -> List[Dict[str, Any]]:
+
         path = Path(file_path)
 
         if not path.exists():
@@ -34,6 +35,7 @@ class ResourceAnalyzer:
     def analyze_resource(
         self, cloud_resource: Dict[str, Any], iac_resources: List[Dict[str, Any]]
     ) -> AnalysisResult:
+
         iac_resource = find_matching_resource(
             cloud_resource, iac_resources, self.match_keys
         )
@@ -90,6 +92,7 @@ class ResourceAnalyzer:
     def save_results(
         self, results: List[Dict[str, Any]], output_file: str, pretty: bool = False
     ) -> None:
+
         path = Path(output_file)
         path.parent.mkdir(parents=True, exist_ok=True)
 
